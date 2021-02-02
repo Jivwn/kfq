@@ -1,0 +1,27 @@
+server:
+  port: 9878
+#  port: 9879
+spring:
+  application:
+    name: shape
+  datasource:
+    username: postgres
+    password: a2689083
+    url: jdbc:postgresql://121.36.71.170:5432/kfq
+    driver-class-name: org.postgresql.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 3
+      auto-commit: true
+      max-lifetime: 1800000
+      idle-timeout: 30000
+      minimum-idle: 1
+#    password: post
+#    url: jdbc:postgresql://localhost:5432/kfq
+
+
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  type-aliases-package: com.zkkj.kfq.entity.*
+  config-location: classpath:mybatis-config.xml

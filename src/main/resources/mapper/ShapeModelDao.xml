@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zkkj.kfq.mapper.ShapeModelDao">
+
+
+    <insert id="insertShapeModel">
+        insert into kfq_geom (type_name, start_time, "area", the_geom, end_time)
+        values
+        <foreach collection="shapeModels" separator="," item="shapeModel">
+            ( #{shapeModel.type_name}, #{shapeModel.startTime}, #{shapeModel.area}::numeric ,
+            st_setsrid(st_geomfromtext(#{shapeModel.the_geom}),4326),
+            #{shapeModel.endTime} )
+        </foreach>
+    </insert>
+
+
+    <insert id="insertShapeChangeModel">
+        insert into kfq_geom_change (type_name, value, start_time, area, the_geom, end_time, "type", "from", "to")
+        values
+        <foreach collection="shapeChangeModels" separator="," item="shapeChangeModel">
+            (
+            #{shapeChangeModel.type_name},#{shapeChangeModel.value},#{shapeChangeModel.startTime},#{shapeChangeModel.area}::numeric,
+            st_setsrid(st_geomfromtext(#{shapeChangeModel.the_geom}),4326),#{shapeChangeModel.endTime},#{shapeChangeModel.type},#{shapeChangeModel.from},
+            #{shapeChangeModel.to} )
+        </foreach>
+    </insert>
+
+
+    <!--    ======================================================================== -->
+
+
+    <select id="listTypeName" resultType="java.lang.String">
+        select distinct type_name
+        from kfq_geom
+    </select>
+
+    <select id="listTypeChangeName" resultType="java.lang.String">
+        select distinct type_name
+        from kfq_geom_change
+    </select>
+
+    <!--   ==================================================================================            -->
+
+    <select id="listStartAndEndTime" resultType="com.zkkj.kfq.entity.TimeModel">
+        select distinct start_time, end_time
+        from kfq_geom
+        where type_name = #{typeName}
+    </select>
+
+    <select id="listStartAndEndTimeChange" resultType="com.zkkj.kfq.entity.TimeModel">
+        select distinct start_time, end_time
+        from kfq_geom_change
+        where type_name = #{typeName}
+    </select>
+
+    <!--    ============================================================================================================ -->
+
+    <select id="listEndTimeGet" resultType="java.util.Date">
+        select distinct end_time
+        from kfq_geom
+        where type_name = #{typeName}
+          and start_time = #{startTime}
+    </select>
+    <select id="listEndTimeGetChange" resultType="java.util.Date">
+        select distinct end_time
+        from kfq_geom_change
+        where type_name = #{typeName}
+          and start_time = #{startTime}
+    </select>
+
+    <!--    ================================================================================================== -->
+
+    <select id="listShapeModel" resultType="com.zkkj.kfq.entity.ShapeModel">
+        select type_name, area, st_astext(st_union(the_geom)) as "the_geom"
+        from kfq_geom
+        where type_name = #{typeName}
+          and start_time = #{startTime}
+          and end_time = #{endTime}
+        group by type_name,area
+    </select>
+
+    <select id="listShapeChangeModel" resultType="com.zkkj.kfq.entity.ShapeChangeModel">
+        select type_name,
+               "value",
+               start_time,
+               area,
+               st_astext(st_union(the_geom)) as "the_geom",
+               end_time,
+               "type",
+               "from",
+               "to"
+        from kfq_geom_change
+        where start_time = #{startTime}
+          and end_time = #{endTime}
+          and "type_name" = #{typeName}
+        group by type_name, "value", start_time, area, end_time, "type", "from", "to"
+    </select>
+
+
+    <!--    ============================================================================================ -->
+
+    <select id="listChangeChart" resultType="com.zkkj.kfq.entity.ShapeChangeModel">
+        select type_name, "value", sum(area) as "area", "type"
+        from kfq_geom_change
+        where "type_name" = #{typeName}
+          and start_time = #{startTime}
+          and end_time = #{endTime}
+        group by "value", "type_name", "type"
+    </select>
+
+
+    <!--   ============================================================================================================= -->
+
+<!--
+               type_name,
+               "value",
+               start_time,
+               area,
+               st_astext(st_union(st_intersection(the_geom,st_geomfromtext(#{wktGeom},4326) ) ) ) as "the_geom",
+               end_time,
+               "type",
+               "from",
+               "to"
+               -->
+    <select id="listChangeIntersect"  resultType="com.zkkj.kfq.entity.ShapeChangeModel">
+        select st_astext(st_union(st_intersection(the_geom,st_geomfromtext(#{wktGeom},4326) ) ) ) as "the_geom"
+        from kfq_geom_change
+        where ST_intersects(st_geomfromtext(#{wktGeom}, 4326), the_geom) = true
+          and start_time = #{startTime}
+          and end_time = #{endTime}
+    </select>
+
+<!--st_geomfromtext(#{wktGeom},4326)-->
+<!--
+                type_name,
+               start_time,
+               "area",
+               st_astext( st_union(st_intersection(the_geom,st_geomfromtext(#{wktGeom},4326) ) ) ) as "the_geom",
+               end_time-->
+    <select id="listShpIntersect" resultType="com.zkkj.kfq.entity.ShapeModel">
+        select  st_astext( st_union(st_intersection(the_geom,st_geomfromtext(#{wktGeom},4326) ) ) ) as "the_geom"
+        from kfq_geom
+        where ST_intersects(st_geomfromtext(#{wktGeom}, 4326), the_geom) = true
+          and start_time = #{startTime}
+          and end_time = #{endTime}
+    </select>
+
+
+</mapper>
