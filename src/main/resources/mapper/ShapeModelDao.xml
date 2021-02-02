@@ -142,7 +142,7 @@
         from kfq_geom
         where ST_intersects(st_geomfromtext(#{wktGeom}, 4326), the_geom) = true
           and start_time = #{startTime}
-          and end_time = #{endTime}
+          and  "type_name" = #{typeName}
     </select>
 
 

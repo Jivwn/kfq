@@ -1,5 +1,6 @@
 package com.zkkj.kfq.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,6 +14,7 @@ public class ShapeModel {
 
     private String type_name;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date startTime;
 
     private Date endTime;

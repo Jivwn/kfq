@@ -1,5 +1,6 @@
 package com.zkkj.kfq.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
@@ -11,8 +12,10 @@ public class ShapeChangeModel {
 
     private String area;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date startTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date endTime;
 
     private String the_geom;

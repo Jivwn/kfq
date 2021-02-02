@@ -14,7 +14,7 @@ public interface GeomChangeService {
     List<ShapeChangeModel> listChangeModel(String changeType,String name,Date startTime,Date endTime,String region);
 
     //类别名称
-    Set<String> listTypeName();
+    List<String> listTypeName(String type) throws Exception;
 
     //起始截止时间
     Map<String,Set<String>> listStartAndEndTime(String TypeName);
@@ -26,7 +26,7 @@ public interface GeomChangeService {
     List<ShapeChangeModel> listChangeChart(String typeName,Date startTime,Date endTime);
 
     //空间查询
-    Map<String,List> listShapeIntersect(String wktGeom,Date startTime,Date endTime);
+    Map<String,List> listShapeIntersect(String wktGeom,Date startTime,String  typeName);
 
     //截止时间信息
     Collection<String> listEndTimeGet(String typeName,Date startTime);

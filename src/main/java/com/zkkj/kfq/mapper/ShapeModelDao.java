@@ -44,5 +44,5 @@ public interface ShapeModelDao {
     List<ShapeChangeModel> listChangeIntersect(String wktGeom,Date startTime,Date endTime);
 
     //空间查询得到表中信息
-    List<ShapeModel> listShpIntersect(String wktGeom,Date startTime,Date endTime);
+    List<ShapeModel> listShpIntersect(String wktGeom,Date startTime,String  typeName);
 }

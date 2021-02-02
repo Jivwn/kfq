@@ -12,12 +12,4 @@ public class KfqShpApplication {
 		SpringApplication.run(KfqShpApplication.class, args);
 	}
 
-	//
-	/*
-
-	 */
-
-	/**
-	 *
-	 */
 }

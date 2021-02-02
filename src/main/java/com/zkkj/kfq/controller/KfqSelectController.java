@@ -1,6 +1,7 @@
 package com.zkkj.kfq.controller;
 
 
+import com.zkkj.kfq.api.CommonResult;
 import com.zkkj.kfq.entity.ShapeChangeModel;
 import com.zkkj.kfq.entity.ShapeModel;
 import com.zkkj.kfq.service.GeomChangeService;
@@ -8,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,50 +24,78 @@ public class KfqSelectController {
     @Autowired
     private GeomChangeService geomChangeService;
 
-    private final DateFormat dateFormat =new SimpleDateFormat("yyyy-MM-dd");
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 
-    @GetMapping("/return/typename")
-    @ApiOperation("产品类别信息")
-    public Object getListTypeName(){
-        return geomChangeService.listTypeName();
+    @GetMapping("/return/ai/typename")
+    @ApiOperation("AI变化检测类别信息")
+    public CommonResult getAITypeNameList() {
+        try {
+            List<String> list = geomChangeService.listTypeName("AI");
+            return CommonResult.success(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.fail(e.getMessage());
+        }
+    }
+
+    @GetMapping("/return/extract/typename")
+    @ApiOperation("AI变化检测类别信息")
+    public CommonResult getExtractTypeNameList() {
+        try {
+            List<String> list = geomChangeService.listTypeName("extract");
+            return CommonResult.success(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.fail(e.getMessage());
+        }
     }
 
 
-    @PostMapping("/return/geom")
-    @ApiOperation("矢量信息")
+    /**
+     * ai变化检测，输入类别，开始/结束时间，查询对应的矢量。
+     *
+     * @param typeName
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @PostMapping("/return/ai/geom")
+    @ApiOperation("AI变化检测矢量")
     public Object getGeomInfo(@RequestParam("type") String typeName,
                               @RequestParam("start") String startTime,
-                              @RequestParam("end") String endTime){
+                              @RequestParam("end") String endTime) {
         try {
-            List<ShapeModel> shapeModels =
-                    geomChangeService.listShapeModel(typeName, dateFormat.parse(startTime), dateFormat.parse(endTime));
+//            List<ShapeModel> shapeModels =
+//                    geomChangeService.listShapeModel(typeName, dateFormat.parse(startTime), dateFormat.parse(endTime));
+
+
+            //todo dao的mxl使用resultMap接收，目前时间字段返回结果为Null，id返回结果为null
             List<ShapeChangeModel> changeModels =
                     geomChangeService.listChangeInfo(typeName, dateFormat.parse(startTime), dateFormat.parse(endTime));
-            List<String> listGeom = new ArrayList<>();
-            List<String> listGeom1 = new ArrayList<>();
-            Map<String,List<String>> mapGeom = new HashMap<>();
-            for(ShapeModel shapeModel : shapeModels){
-                listGeom.add(shapeModel.getThe_geom());
-            }
-            mapGeom.put("normal",listGeom);
-            for (ShapeChangeModel shapeChangeModel : changeModels){
-                listGeom1.add(shapeChangeModel.getThe_geom());
-            }
-            mapGeom.put("change",listGeom1);
-
-            return mapGeom;
-        }catch (ParseException e) {
+//            List<String> listGeom = new ArrayList<>();
+//            List<String> listGeom1 = new ArrayList<>();
+//            Map<String, List<String>> mapGeom = new HashMap<>();
+//            for (ShapeModel shapeModel : shapeModels) {
+//                listGeom.add(shapeModel.getThe_geom());
+//            }
+//            mapGeom.put("normal", listGeom);
+//            for (ShapeChangeModel shapeChangeModel : changeModels) {
+//                listGeom1.add(shapeChangeModel.getThe_geom());
+//            }
+//            mapGeom.put("change", listGeom1);
+            return CommonResult.success(changeModels);
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    @PostMapping("/return/chart")
-    @ApiOperation("图表信息")
-    public Object getInfoChart(@RequestParam("type")String typeName,
-                               @RequestParam("start")String startTime,
-                               @RequestParam("end")String endTime){
+    @PostMapping("/return/ai/chart")
+    @ApiOperation("AI变化检测图表信息")
+    public Object getInfoChart(@RequestParam("type") String typeName,
+                               @RequestParam("start") String startTime,
+                               @RequestParam("end") String endTime) {
         try {
             List<ShapeChangeModel> shapeChangeModels =
                     geomChangeService.listChangeChart(typeName, dateFormat.parse(startTime), dateFormat.parse(endTime));
@@ -77,18 +107,23 @@ public class KfqSelectController {
     }
 
 
-
-    @PostMapping("/return/intersection")
-    @ApiOperation("矢量面相交")
-    public Object intersectGeomFromShp(@RequestParam("geom") String wktGeom,
-                                       @RequestParam("start") String startTime,
-                                       @RequestParam("end") String endTime){
+    /**
+     * @param typeName  类型
+     * @param wktGeom  所选区域
+     * @param time  不分开始结束时间，只有时间
+     * @return
+     */
+    @PostMapping("/return/extract/intersection")
+    @ApiOperation("遥感信息提取矢量面相交")
+    public Object intersectGeomFromShp(@RequestParam("type") String typeName,
+                                       @RequestParam("geom") String wktGeom,
+                                       @RequestParam("time") String time) {
         //格式是wkt格式数据
         try {
             Map<String, List> stringListMap =
-                    geomChangeService.listShapeIntersect(wktGeom,dateFormat.parse(startTime),dateFormat.parse(endTime));
+                    geomChangeService.listShapeIntersect(wktGeom, dateFormat.parse(time), typeName);
             return stringListMap;
-        }catch (ParseException e){
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return null;
@@ -114,8 +149,6 @@ public class KfqSelectController {
 //        }
 //        return null;
 //    }
-
-
 
 
 //    @GetMapping("/return/typeinfo")
